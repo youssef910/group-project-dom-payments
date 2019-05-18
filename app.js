@@ -36,7 +36,7 @@
 var account = {
   number: 100402153,
   initialBalance: 100,
-  paymentsUrl: '/data/payments.json',
+  paymentsUrl: "/data/payments.json",
   payments: []
 };
 
@@ -48,15 +48,14 @@ var account = {
  *
  * You may edit this code.
  */
-document.querySelector('#loadButton')
-  .addEventListener('click', function () {
-    fetch(account.paymentsUrl)
-      .then(response => response.json())
-      .then(payments => {
-        account.payments = payments;
-        render(account);
-      });
-  });
+document.querySelector("#loadButton").addEventListener("click", function() {
+  fetch(account.paymentsUrl)
+    .then(response => response.json())
+    .then(payments => {
+      account.payments = payments;
+      render(account);
+    });
+});
 
 /**
  * Write a render function below that updates the DOM with the
@@ -72,11 +71,15 @@ document.querySelector('#loadButton')
  * @param {Object} account The account details
  */
 function render(account) {
-
   // Display the account number
-  document.querySelector('#accountNumber')
-    .innerText = account.number;
-};
+  document.querySelector("#accountNumber").innerText = account.number;
+  // Display most valiable ammount in the selected month
+  document.querySelector(
+    "#mostValuablePayment"
+  ).innerText = displayMostValuableAmount(account.payments);
+  // cancel button
+  cancelButton.addEventListener("click", deleteRowWhichContainCancel);
+}
 
 /**
  * Write any additional functions that you need to complete
@@ -86,3 +89,37 @@ function render(account) {
  * calculate balances, find completed or pending payments,
  * add up payments, and more.
  */
+
+// 5. Show the amount of the most valuable payment that was
+//   received this month (May 2019).
+function displayMostValuableAmount(paymentData) {
+  // calculate the   completed payments + pending payments
+  return paymentData
+    .filter(
+      payment =>
+        payment.date.includes(monthToFilter) && payment.completed === true
+    )
+    .map(process => process.amount)
+    .sort((a, b) => a - b)
+    .pop();
+}
+
+// 6. For each PENDING payment, add a button that says "cancel"
+//    to the end of that payment's row. When the button is
+//    clicked, the payment should be removed from the account
+//    and the render function should be called again to update the page.
+
+cancelButton.addEventListener("click", deleteRowWhichContainCancel);
+function deleteRowWhichContainCancel() {
+  // querySelector for deleteRow
+  var deleteRow = document.querySelector(".deleteRow");
+  return (
+    deleteRow.remove(),
+    (document.querySelector(
+      // update then palance after removing the pending amount
+      "#pendingBalance"
+    ).innerText =
+      calculateInitialBalancePlusSumOfPayments(account.payments) -
+      account.initialBalance)
+  );
+}
